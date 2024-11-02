@@ -30,7 +30,7 @@ RUN git clone \
     cd "${HOME}" && \
     rm -rf LightGBM
 
-FROM python:3.7
+FROM python:3.14.0a1
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
