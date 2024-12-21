@@ -1,4 +1,4 @@
-FROM alpine:3.17 AS build
+FROM alpine:3.21.0 AS build
 
 # Install kubectl.
 ENV K8S_VERSION v1.29.3
@@ -8,7 +8,7 @@ RUN wget -q https://storage.googleapis.com/kubernetes-release/release/${K8S_VERS
 RUN chmod +x ./kubectl
 RUN mv ./kubectl /bin/kubectl
 
-FROM alpine:3.17
+FROM alpine:3.21.0
 COPY --from=build /bin/kubectl /bin/kubectl
 RUN apk add --no-cache bash
 
