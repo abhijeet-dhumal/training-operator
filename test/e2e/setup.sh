@@ -1,6 +1,6 @@
 set -euo pipefail
 : "${KUEUE_VERSION:=v0.6.1}" # v0.6.1 is current release
-: "${KFTO_IMG:=training-operator:dev}" 
+: "${KFTO_IMG:=training-operator:dev}"
 
 BASE_DIR=`pwd`
 TEST_DIR="${BASE_DIR}/test/e2e"
