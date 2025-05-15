@@ -1,5 +1,5 @@
 # Install python 3.6
-FROM python:3.6
+FROM python:3.12.10
 
 RUN mkdir -p /opt/mlkube
 
