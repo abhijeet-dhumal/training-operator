@@ -154,7 +154,16 @@ jobs:
             git checkout -b ${{ env.UPDATER_BRANCH }}
             git commit -am "Updated notebooks via ${{ env.UPDATER_BRANCH }} GitHub action" --signoff
             git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/$REPO_OWNER/$REPO_NAME.git
-            git push origin ${{ env.UPDATER_BRANCH }}
+            
+            # Check if branch already exists on remote and handle accordingly
+            if git ls-remote --exit-code --heads origin ${{ env.UPDATER_BRANCH }} > /dev/null 2>&1; then
+              echo "Branch ${{ env.UPDATER_BRANCH }} already exists on remote. Force pushing to overwrite..."
+              git push --force origin ${{ env.UPDATER_BRANCH }}
+            else
+              echo "Creating new branch ${{ env.UPDATER_BRANCH }} on remote..."
+              git push origin ${{ env.UPDATER_BRANCH }}
+            fi
+            
             echo "SKIP_PR_CREATION=false" >> $GITHUB_ENV
           fi
 
