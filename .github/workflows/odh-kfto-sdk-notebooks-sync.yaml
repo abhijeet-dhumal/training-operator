@@ -209,11 +209,28 @@ jobs:
       - name: Create Pull Request
         if: env.SKIP_PR_CREATION == 'false'
         run: |
-          gh pr create --repo $UPSTREAM_OWNER/$UPSTREAM_REPO_NAME \
-            --title "$pr_title" \
-            --body "$pr_body" \
-            --head $REPO_OWNER:$UPDATER_BRANCH \
-            --base $BRANCH_NAME
+          cd $REPO_NAME
+          
+          # Check if there are commits between the base and head branches
+          echo "Checking for commits between $UPSTREAM_OWNER/$UPSTREAM_REPO_NAME:$BRANCH_NAME and $REPO_OWNER:$UPDATER_BRANCH..."
+          
+          # Fetch the upstream branch to compare
+          git fetch upstream $BRANCH_NAME
+          
+          # Compare commits between our branch and upstream
+          commit_count=$(git rev-list --count upstream/$BRANCH_NAME..$UPDATER_BRANCH)
+          
+          if [ "$commit_count" -eq 0 ]; then
+            echo "No commits found between upstream/$BRANCH_NAME and $UPDATER_BRANCH"
+            echo "The upstream repository already contains these changes. Skipping PR creation."
+          else
+            echo "Found $commit_count commit(s) to create PR with."
+            gh pr create --repo $UPSTREAM_OWNER/$UPSTREAM_REPO_NAME \
+              --title "$pr_title" \
+              --body "$pr_body" \
+              --head $REPO_OWNER:$UPDATER_BRANCH \
+              --base $BRANCH_NAME
+          fi
         env:
           pr_title: "[Kubeflow-Training Action] Update notebook's pipfile to sync with Kubeflow-Training SDK release ${{ env.TRAINING_SDK_RELEASE_VERSION }}"
           pr_body: |
