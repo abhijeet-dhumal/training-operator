@@ -130,7 +130,7 @@ jobs:
                   echo "$((total-counter)) directories remaining.."
                 done
                 # Refresh Pipfile.Lock files
-                cd $REPO_NAME && make refresh-pipfilelock-files && cd -
+                # cd $REPO_NAME && make refresh-pipfilelock-files && cd -
             else
                 versions_list=$(echo "$versions" | tr '\n' '   ' | sed 's/, $//')
                 versions="${versions_list%,}"
@@ -142,12 +142,24 @@ jobs:
       - name: Push changes
         run: |
           cd $REPO_NAME
-          git add . && git status && git checkout -b ${{ env.UPDATER_BRANCH }} && \
-          git commit -am "Updated notebooks via ${{ env.UPDATER_BRANCH }} GitHub action" --signoff  &&
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/$REPO_OWNER/$REPO_NAME.git
-          git push origin ${{ env.UPDATER_BRANCH }}
+          git add .
+          
+          # Check if there are any changes to commit
+          if git diff --cached --quiet; then
+            echo "No changes detected. Skipping branch creation and push."
+            echo "SKIP_PR_CREATION=true" >> $GITHUB_ENV
+          else
+            echo "Changes detected. Creating branch and pushing..."
+            git status
+            git checkout -b ${{ env.UPDATER_BRANCH }}
+            git commit -am "Updated notebooks via ${{ env.UPDATER_BRANCH }} GitHub action" --signoff
+            git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/$REPO_OWNER/$REPO_NAME.git
+            git push origin ${{ env.UPDATER_BRANCH }}
+            echo "SKIP_PR_CREATION=false" >> $GITHUB_ENV
+          fi
 
       - name: Verify branch and commit exist with timeout
+        if: env.SKIP_PR_CREATION == 'false'
         run: |
           cd $REPO_NAME
           echo "Verifying branch $UPDATER_BRANCH exists on $REPO_OWNER/$REPO_NAME with valid commit..."
@@ -187,7 +199,15 @@ jobs:
             sleep 10
           done
 
+      - name: No changes detected
+        if: env.SKIP_PR_CREATION == 'true'
+        run: |
+          echo "No changes were detected in the Pipfiles."
+          echo "The kubeflow-training version $TRAINING_SDK_RELEASE_VERSION is already up to date."
+          echo "Skipping PR creation."
+
       - name: Create Pull Request
+        if: env.SKIP_PR_CREATION == 'false'
         run: |
           gh pr create --repo $UPSTREAM_OWNER/$UPSTREAM_REPO_NAME \
             --title "$pr_title" \
