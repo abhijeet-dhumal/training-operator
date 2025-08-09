@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM tensorflow/tensorflow:2.17.0
+FROM tensorflow/tensorflow:2.20.0rc0
 
 # Using keras-2.17 because of bug on keras-3.4.1
 # which used by default by TF-2.17 (https://github.com/tensorflow/tensorflow/issues/72388)
