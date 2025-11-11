@@ -39,8 +39,8 @@ image:
   registry: ghcr.io
   # -- Image repository.
   repository: kubeflow/trainer/trainer-controller-manager
-  # -- Image tag.
-  tag: latest
+  # -- Image tag. Defaults to the chart appVersion.
+  tag: ""
   # -- Image pull policy.
   pullPolicy: IfNotPresent
   # -- Image pull secrets for private image registry.
@@ -115,6 +115,7 @@ manager:
       port: 9443
       host: ""
     leaderElection:
+      leaderElect: true
       resourceName: "trainer.kubeflow.org"
       resourceNamespace: ""
       leaseDuration: "15s"
