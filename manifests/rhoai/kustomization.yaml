@@ -51,6 +51,8 @@ patches:
 # through a ComponentConfig type
 - path: manager_config_patch.yaml
 - path: manager_metrics_patch.yaml
+# RHAI-specific RBAC for progression tracking
+- path: rbac_progression_patch.yaml
 - patch: |-
     - op: remove
       path: /spec/ports/0
