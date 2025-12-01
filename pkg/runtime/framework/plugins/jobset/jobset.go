@@ -281,8 +281,9 @@ func (j *JobSet) Build(ctx context.Context, info *runtime.Info, trainJob *traine
 		}
 
 		// RHAI-specific: Inject preStop hook for progression tracking on trainer pods
+		// Only inject during initial JobSet creation to avoid webhook rejection on immutable fields
 		// Note: This uses pkg/rhai/progression to keep RHAI logic centralized
-		if ps.Ancestor != nil && *ps.Ancestor == constants.AncestorTrainer {
+		if oldJobSet == nil && ps.Ancestor != nil && *ps.Ancestor == constants.AncestorTrainer {
 			if err := progression.InjectPreStopHookToApplyConfig(
 				jobSetSpec.ReplicatedJobs[psIdx].Template.Spec.Template.Spec,
 				trainJob,
